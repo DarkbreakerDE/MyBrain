@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from pathlib import Path
 from databases import faiss_database, sqlite_database
 from gui.file_dialog import get_file_paths_gui_qt5
