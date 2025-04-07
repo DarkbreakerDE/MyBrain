@@ -1,0 +1,7 @@
+Databases:
+  Faiss:
+    name: "faiss_v1.index"
+    folder: "./databases"
+  Sqlite:
+    name: "Sqlite.db"
+    folder: "./databases"
