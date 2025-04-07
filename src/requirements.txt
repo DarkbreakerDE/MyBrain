@@ -1,0 +1,11 @@
+faiss_cpu==1.10.0
+langdetect==1.0.9
+numpy==2.2.4
+pypdfium2==4.30.1
+PyQt5==5.15.11
+PyQt5_sip==12.17.0
+PyYAML==6.0.2
+PyYAML==6.0.2
+regex==2024.11.6
+sentence_transformers==2.6.1
+spacy==3.8.4
