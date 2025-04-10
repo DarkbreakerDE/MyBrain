@@ -39,13 +39,15 @@ def set_sqlite_path(path):
 
 def set_faiss_name(name):
     global faiss_database_path
-    faiss_database_path = str(Path(_faiss.get("folder", ".")).resolve().joinpath(name))
+    faiss_database_path = str(
+        Path(_faiss.get("folder", ".")).resolve().joinpath(name + ".index")
+    )
 
 
 def set_sqlite_name(name):
     global sqlite_database_path
     sqlite_database_path = str(
-        Path(_sqlite.get("folder", ".")).resolve().joinpath(name)
+        Path(_sqlite.get("folder", ".")).resolve().joinpath(name + ".db")
     )
 
 
@@ -65,9 +67,9 @@ def set_sqlite_dir(dir):
 
 def set_faiss_dir_name(dir, name):
     global faiss_database_path
-    faiss_database_path = str(Path(dir).resolve().joinpath(name))
+    faiss_database_path = str(Path(dir).resolve().joinpath(name + ".index"))
 
 
 def set_sqlite_dir_name(dir, name):
     global sqlite_database_path
-    sqlite_database_path = str(Path(dir).resolve().joinpath(name))
+    sqlite_database_path = str(Path(dir).resolve().joinpath(name + ".db"))
