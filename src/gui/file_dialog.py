@@ -11,13 +11,16 @@ def get_file_paths_gui_tkinter():
 
     # Dialog zum Auswählen mehrerer PDF-Dateien öffnen
     file_paths = filedialog.askopenfilenames(
-        title="PDF-Dateien auswählen", filetypes=[("PDF Dateien", "*.pdf")]
+        title="Select PDF files", filetypes=[("PDF files", "*.pdf")]
     )
 
     # Ergebnis ausgeben
-    print("Ausgewählte Dateien:")
-    for path in file_paths:
-        print(path)
+    if file_paths:
+        print("Choosen files:")
+        for i, path in enumerate(file_paths):
+            print(f"{i}.", path)
+    else:
+        print("No files selected!")
 
     return file_paths
 
@@ -28,11 +31,14 @@ def get_file_paths_gui_qt5():
 
     # Datei-Dialog öffnen
     files, _ = QFileDialog.getOpenFileNames(
-        None, "PDF-Dateien auswählen", "", "PDF Dateien (*.pdf)"
+        None, "Select PDF files", "", "PDF files (*.pdf)"
     )
     # Ergebnis ausgeben
-    print("Ausgewählte Dateien:")
-    for path in files:
-        print(path)
+    if files:
+        print("Choosen files:")
+        for i, path in enumerate(files):
+            print(f"{i}.", path)
+    else:
+        print("No files selected!")
 
     return files

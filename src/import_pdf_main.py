@@ -1,25 +1,31 @@
 #!/usr/bin/python3
 from pathlib import Path
+import Config
+from args.import_pdf_parse import parse_args_and_set
 from databases import faiss_database, sqlite_database
 from gui.file_dialog import get_file_paths_gui_qt5
 from load_files.load_pdf import load_and_map_ret
-from Config import faiss_database_name, sqlite_database_name
 from models import model
 from pipelines import clean_page, clean_pages
+from pipelines.edit_text_editor import edit
 from utils.hash_file import hash_file
 from utils.pritty_format_list import pretty_format_list
 from utils.pritty_print_list import pretty_print_list
-from utils.write_string_to_file import write_string_to_file
 from utils.flatten_nested_list import flatten_nested_list
 
-if __name__ == "__main__":
+
+def main():
+    files = parse_args_and_set()
+
     print("MyBrain Started\n")
-    # testScript.foo(folder_name, file_name)
+    print("Faiss Database Path:", Config.faiss_database_path)
+    print("Sqlite Database Path:", Config.sqlite_database_path)
 
-    print("Faiss Database Path:", faiss_database_name)
-    print("Sqlite Database Path:", sqlite_database_name)
+    sqlite_database.init()
+    faiss_database.init()
 
-    files = get_file_paths_gui_qt5()
+    if not files:
+        files = get_file_paths_gui_qt5()
 
     for file in files:
 
@@ -32,9 +38,11 @@ if __name__ == "__main__":
 
             text_after = pretty_format_list(data)
 
-            write_string_to_file("text_before.txt", text_before)
-            write_string_to_file("text_after.txt", text_after)
+            if Config.edit:
+                data = edit(text_before, text_after)
+
             # data = remove_common_substring(data)
+
             pretty_print_list(data)
 
             embeddings = model.create_entry_embeddings_float32(
@@ -47,3 +55,7 @@ if __name__ == "__main__":
     # testScript.sliding_window()
 
     # testScript.splitting_sentences()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,38 +1,53 @@
 import sqlite3
-from Config import sqlite_database_name
 import atexit
-
-conn = sqlite3.connect(sqlite_database_name)
-cursor = conn.cursor()
-
-
-cursor.execute(
-    """
-CREATE TABLE IF NOT EXISTS files (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    fingerprint TEXT NOT NULL UNIQUE
-)
-"""
-)
+import Config
+import os
+from typing import Optional
 
 
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS passages (
-        id INTEGER PRIMARY KEY,
-        text TEXT,
-        file_id INTEGER NOT NULL,
-        FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE
+conn: Optional[sqlite3.Connection] = None
+cursor: Optional[sqlite3.Cursor] = None
+
+
+def init():
+    global conn, cursor
+
+    if Config.overwrite and os.path.exists(Config.sqlite_database_path):
+        os.remove(Config.sqlite_database_path)
+
+    conn = sqlite3.connect(Config.sqlite_database_path)
+    cursor = conn.cursor()
+
+    # Foreign keys aktivieren
+    cursor.execute("PRAGMA foreign_keys = ON")
+
+    # Tabellen erstellen
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS files (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            fingerprint TEXT NOT NULL UNIQUE
+        )
+        """
     )
-"""
-)
 
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS passages (
+            id INTEGER PRIMARY KEY,
+            text TEXT,
+            file_id INTEGER NOT NULL,
+            FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE
+        )
+        """
+    )
 
-cursor.execute("PRAGMA foreign_keys = ON")
+    atexit.register(conn.close)
 
 
 def next_id():
+    assert cursor is not None
     cursor.execute("SELECT MAX(id) FROM passages")
     result = cursor.fetchone()
     current_max_id = result[0] if result[0] is not None else -1
@@ -40,6 +55,8 @@ def next_id():
 
 
 def insert_passages(passages, file_id):
+    assert cursor is not None
+    assert conn is not None
     base_id = next_id()
     for idx, passage in enumerate(passages):
         cursor.execute(
@@ -50,12 +67,14 @@ def insert_passages(passages, file_id):
 
 
 def get_passage(passage_id):
+    assert cursor is not None
     cursor.execute("SELECT text FROM passages WHERE id = ?", (passage_id,))
     row = cursor.fetchone()
     return row[0] if row else None
 
 
 def get_passage_context(passage_id: int, before: int = 1, after: int = 1):
+    assert cursor is not None
     # Zentrale Passage abrufen (inkl. file_id)
     cursor.execute("SELECT text, file_id FROM passages WHERE id = ?", (passage_id,))
     row = cursor.fetchone()
@@ -93,6 +112,7 @@ def get_passage_context(passage_id: int, before: int = 1, after: int = 1):
 
 
 def insert_file_or_none(filename: str, fingerprint: str):
+    assert cursor is not None
     # Versuche zuerst, ob der Fingerprint schon existiert
     cursor.execute("SELECT id FROM files WHERE fingerprint = ?", (fingerprint,))
     row = cursor.fetchone()
@@ -104,6 +124,3 @@ def insert_file_or_none(filename: str, fingerprint: str):
         "INSERT INTO files (name, fingerprint) VALUES (?, ?)", (filename, fingerprint)
     )
     return cursor.lastrowid
-
-
-atexit.register(conn.close)
